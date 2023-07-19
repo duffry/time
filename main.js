@@ -70,7 +70,13 @@ function getUrlParams() {
     let params = {};
     window.location.search.substring(1).split('&').forEach(pair => {
         let [key, value] = pair.split('=');
-        if (value && value.includes('-')) { 
+
+        // Check for 'start' parameter and handle it separately
+        if (key === 'start' && value) {
+            params[key] = decodeURIComponent(value);
+        }
+        // Handle date range parameters
+        else if (value && value.includes('-')) { 
             let [startDate, endDate] = value.split('-');
             let currentDate = new Date(startDate.slice(0, 4), startDate.slice(4, 6) - 1, startDate.slice(6, 8));
             let end = new Date(endDate.slice(0, 4), endDate.slice(4, 6) - 1, endDate.slice(6, 8));
@@ -82,7 +88,9 @@ function getUrlParams() {
                 params[key].push(currentDate.toISOString().slice(0, 10).replace(/-/g, '')); 
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-        } else if (value) {
+        } 
+        // Handle other general parameters
+        else if (value) {
             if (!params[key]) {
                 params[key] = [];
             }
@@ -92,15 +100,47 @@ function getUrlParams() {
     return params;
 }
 
+/**
+ * Fetches the start date specified in the URL. If not present, 
+ * it defaults to the month three months before the current month.
+ * Now accepts dates in YYYYMM and YYYYMMDD format.
+ * 
+ * @returns {Date} - The specified start date or a default date.
+ */
 function getStartDateFromUrl() {
-    const params = getUrlParams();
-    if (params['start'] && /^\d{8}$/.test(params['start'])) {  // Validate the format
-        const year = parseInt(params['start'].slice(0, 4), 10);
-        const month = parseInt(params['start'].slice(4, 6), 10) - 1;  // 0-indexed month
-        return new Date(year, month, 1);  // Return the first day of the month
+    let params = getUrlParams();
+    
+    // If 'start' is specified in the URL
+    if (params.start) {
+        let year, month, day = 1; // Default day to the 1st
+
+        if (params.start.length === 6) {
+            year = parseInt(params.start.slice(0, 4));
+            month = parseInt(params.start.slice(4, 6)) - 1; // months are 0-indexed
+        } else if (params.start.length === 8) {
+            year = parseInt(params.start.slice(0, 4));
+            month = parseInt(params.start.slice(4, 6)) - 1;
+            day = parseInt(params.start.slice(6, 8));
+        } else {
+            console.error("Invalid date format in URL parameter. Expected YYYYMM or YYYYMMDD.");
+            return getDefaultStartDate();
+        }
+
+        return new Date(year, month, day);
     }
-    return new Date();  // Default to today if no valid date provided
+
+    return getDefaultStartDate();
 }
+
+function getDefaultStartDate() {
+    // Default to the month three months before the current month
+    let currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() - 3);
+    currentDate.setDate(1); // Ensure it starts on the first day of the month
+    return currentDate;
+}
+
+
 
 /** Map of shorthand character keys to their corresponding colors. */
 const colorMap = {
@@ -164,21 +204,22 @@ function updateDateTime() {
 function generateCalendarGrid() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const calendarContainer = document.getElementById('calendar');
-	var startDate = getStartDateFromUrl();
-	var currentYear = startDate.getFullYear();
-	var currentMonth = startDate.getMonth();
+    const startDate = getStartDateFromUrl();
+    let year = startDate.getFullYear();
+    let month = startDate.getMonth();
 
-
-    for (let i = 0; i < 12; i++) {
-        const month = (currentMonth + i + 12 - 3) % 12; 
-        const year = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12);
-
+    for (let i = 0; i < 12; i++) { 
         const monthContainer = document.createElement('div');
-        monthContainer.id = `month${month}`;
+        monthContainer.id = 'month' + month; 
         monthContainer.className = 'month-grid';
-        monthContainer.innerHTML = `<h3>${months[month]} ${year}</h3>`;
-
+        monthContainer.innerHTML = '<h3>' + months[month] + ' ' + year + '</h3>';
         calendarContainer.appendChild(monthContainer);
+
+        month++;
+        if(month === 12) {
+            month = 0;
+            year++;
+        }
     }
 }
 
@@ -195,12 +236,12 @@ function isLeapYear(year) {
  * Creates and returns a day cell element.
  * @param {number} day - The day number.
  * @param {number} firstDay - The first day of the month (0 = Sunday, 6 = Saturday).
- * @param {number} month - The current month.
  * @param {number} year - The current year.
+ * @param {number} month - The current month.
+ * @param {Date} currentDate - The current date (with no time component).
  * @returns {HTMLElement} - The created day cell.
  */
-function createDayCell(day, firstDay, month, year) {
-    const currentDate = new Date();
+function createDayCell(day, firstDay, year, month, currentDate) {
     const dayCell = document.createElement('div');
     dayCell.className = 'day-cell';
     dayCell.textContent = day;
@@ -228,41 +269,61 @@ function createDayCell(day, firstDay, month, year) {
     return dayCell;
 }
 
+
+/**
+ * Gets the number of days in a given month for a specific year.
+ * 
+ * @param {number} month - The month for which the number of days is required. (0-based: 0 = January, 11 = December)
+ * @param {number} year - The year for the specified month.
+ * @returns {number} - The number of days in the specified month for the given year.
+ */
+function getDaysInMonth(month, year) {
+    return new Date(year, month + 1, 0).getDate();
+}
+
+
 /**
  * Populates the previously generated calendar with the appropriate days for each month.
  */
 function populateCalendarWithDates() {
     const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
+	currentDate.setHours(0, 0, 0, 0);
+    const startDate = getStartDateFromUrl();
+    let year = startDate.getFullYear();
+    let month = startDate.getMonth();
 
-    for (let i = 0; i < 12; i++) {
-        const month = (currentMonth + i + 12 - 3) % 12;
-        const year = currentYear + Math.floor((currentMonth + i - 3) / 12);
-        
-        const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const monthContainer = document.getElementById(`month${month}`);
-        
-        // Update the month name and year displayed above the calendar block
-        monthContainer.innerHTML = `<h3>${monthNames[month]} ${year}</h3>`;
-        
+    for (let i = 0; i < 12; i++) { 
+        const monthContainer = document.getElementById('month' + month); 
         const daysContainer = document.createElement('div');
         monthContainer.appendChild(daysContainer);
-        const firstDay = new Date(year, month, 1).getDay();
 
-        for (let day = 1; day <= daysInMonth[month]; day++) {
-            if (day === 1) {
-                for (let k = 1; k < firstDay; k++) {
-                    const blankCell = document.createElement('div');
-                    blankCell.className = 'day-cell';
-                    daysContainer.appendChild(blankCell);
-                }
-            }
+        let firstDay = new Date(year, month, 1).getDay();
+        firstDay = firstDay === 0 ? 7 : firstDay; // Adjust for Sunday
 
-            daysContainer.appendChild(createDayCell(day, firstDay, month, year));
+        // Add the blank cells before the first day of the month
+        for (let k = 0; k < firstDay - 1; k++) {
+            const blankCell = document.createElement('div');
+            blankCell.className = 'day-cell';
+            daysContainer.appendChild(blankCell);
+        }
+
+        // Number of days in the current month
+        const daysInMonthCount = getDaysInMonth(month, year);
+
+        // Add the actual days of the month
+        for (let day = 1; day <= daysInMonthCount; day++) {
+            const dayCell = createDayCell(day, firstDay, year, month, currentDate);
+            daysContainer.appendChild(dayCell);
+        }
+
+        month++;
+        if (month === 12) {
+            month = 0;
+            year++;
         }
     }
 }
+
 
 // Just a reminder to also have your monthNames array somewhere accessible:
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
