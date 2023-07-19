@@ -92,13 +92,28 @@ function getUrlParams() {
     return params;
 }
 
+function getStartDateFromUrl() {
+    const params = getUrlParams();
+    if (params['start'] && /^\d{8}$/.test(params['start'])) {  // Validate the format
+        const year = parseInt(params['start'].slice(0, 4), 10);
+        const month = parseInt(params['start'].slice(4, 6), 10) - 1;  // 0-indexed month
+        return new Date(year, month, 1);  // Return the first day of the month
+    }
+    return new Date();  // Default to today if no valid date provided
+}
+
 /** Map of shorthand character keys to their corresponding colors. */
 const colorMap = {
-    'r': '#A0524D',
-    'g': '#608B4E',
-    'b': '#5C7295',
-    'p': '#7D6C8C'
+    'r': '#A0524D', // Red
+    'g': '#608B4E', // Green
+    'b': '#5C7295', // Blue
+    'p': '#7D6C8C', // Purple
+    'y': '#C0B43E', // Yellow
+    'o': '#D79C4F', // Orange
+    't': '#3B7F83', // Teal
+    'm': '#9F5A4F', // Mud
 };
+
 
 /**
  * Uses the colorMap and the parameters from the URL to apply specific color stylings 
@@ -149,9 +164,10 @@ function updateDateTime() {
 function generateCalendarGrid() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const calendarContainer = document.getElementById('calendar');
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
+	var startDate = getStartDateFromUrl();
+	var currentYear = startDate.getFullYear();
+	var currentMonth = startDate.getMonth();
+
 
     for (let i = 0; i < 12; i++) {
         const month = (currentMonth + i + 12 - 3) % 12; 
@@ -189,8 +205,11 @@ function createDayCell(day, firstDay, month, year) {
     dayCell.className = 'day-cell';
     dayCell.textContent = day;
 
-    const dayOfWeek = (day + firstDay - 1) % 7;
-    const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+    // Adjust firstDay to be from 1 (Monday) to 7 (Sunday)
+    firstDay = firstDay === 0 ? 7 : firstDay;
+
+    const dayOfWeek = (day + firstDay - 2) % 7 + 1;
+    const isWeekend = dayOfWeek === 6 || dayOfWeek === 7;
     const isToday = (year === currentDate.getFullYear()) && (month === currentDate.getMonth()) && (day === currentDate.getDate());
     const isPast = (year < currentDate.getFullYear()) || (year === currentDate.getFullYear() && month < currentDate.getMonth()) || (year === currentDate.getFullYear() && month === currentDate.getMonth() && day < currentDate.getDate());
 
@@ -214,14 +233,19 @@ function createDayCell(day, firstDay, month, year) {
  */
 function populateCalendarWithDates() {
     const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
 
     for (let i = 0; i < 12; i++) {
         const month = (currentMonth + i + 12 - 3) % 12;
-        const year = currentDate.getFullYear() + Math.floor((currentMonth + i + 12 - 3) / 12) - 1;
+        const year = currentYear + Math.floor((currentMonth + i - 3) / 12);
         
         const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const monthContainer = document.getElementById(`month${month}`);
+        
+        // Update the month name and year displayed above the calendar block
+        monthContainer.innerHTML = `<h3>${monthNames[month]} ${year}</h3>`;
+        
         const daysContainer = document.createElement('div');
         monthContainer.appendChild(daysContainer);
         const firstDay = new Date(year, month, 1).getDay();
@@ -239,6 +263,10 @@ function populateCalendarWithDates() {
         }
     }
 }
+
+// Just a reminder to also have your monthNames array somewhere accessible:
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 
 /**
  * Parses a date string in various formats (YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, MM-DD-YYYY) 
