@@ -12,6 +12,9 @@
 			font-size: 2em;
 			text-align: center;
 		}
+		#time {
+			font-size: 3em;
+		}
 		#calendar {
 			display: grid;
 			grid-template-columns: repeat(3, 1fr);
@@ -39,6 +42,9 @@
 			padding: 2px;
 			text-align: center;
 			font-size: 0.8em;
+		}
+		.blank {
+			border: 0px;
 		}
 		.past {
 			background-color: #d3d3d3; /* Light gray */

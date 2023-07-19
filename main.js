@@ -303,7 +303,7 @@ function populateCalendarWithDates() {
         // Add the blank cells before the first day of the month
         for (let k = 0; k < firstDay - 1; k++) {
             const blankCell = document.createElement('div');
-            blankCell.className = 'day-cell';
+            blankCell.className = 'day-cell blank';
             daysContainer.appendChild(blankCell);
         }
 
