@@ -6,216 +6,253 @@ function main() {
 }
 
 
+/**
+ * Formats a given date object into a time string in the format: HH:MM:SS.
+ *
+ * @param {Date} date - The date object to be formatted.
+ * @return {string} - The formatted time string.
+ */
 function formatTime(date) {
-	var hours = date.getHours();
-	var minutes = date.getMinutes();
-	var seconds = date.getSeconds();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
 
-	hours = hours < 10 ? '0' + hours : hours;
-	minutes = minutes < 10 ? '0' + minutes : minutes;
-	seconds = seconds < 10 ? '0' + seconds : seconds;
+    hours = hours < 10 ? '0' + hours : hours;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
 
-	return hours + ':' + minutes + ':' + seconds;
+    return `${hours}:${minutes}:${seconds}`;
 }
 
+/**
+ * Formats a given date object into a full date string: Day DD Month YYYY.
+ *
+ * @param {Date} date - The date object to be formatted.
+ * @return {string} - The formatted date string.
+ */
 function formatDate(date) {
-	var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-	var day = days[date.getDay()];
-	var dateNum = date.getDate();
-	var month = months[date.getMonth()];
-	var year = date.getFullYear();
+    let day = days[date.getDay()];
+    let dateNum = date.getDate();
+    let month = months[date.getMonth()];
+    let year = date.getFullYear();
 
-	return day + ' ' + dateNum + ' ' + month + ' ' + year;
+    return `${day} ${dateNum} ${month} ${year}`;
 }
 
+/**
+ * Formats a given date object into a short date string: DDD DD MMM.
+ *
+ * @param {Date} date - The date object to be formatted.
+ * @return {string} - The formatted short date string.
+ */
 function formatShortDate(date) {
-	var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-	var day = days[date.getDay()];
-	var dateNum = date.getDate();
-	var month = months[date.getMonth()];
+    let day = days[date.getDay()];
+    let dateNum = date.getDate();
+    let month = months[date.getMonth()];
 
-	return day + ' ' + dateNum + ' ' + month;
+    return `${day} ${dateNum} ${month}`;
 }
 
+/**
+ * Parses the URL's query parameters. If a parameter has a date range (YYYYMMDD-YYYYMMDD), 
+ * it breaks this range down into a list of individual dates. It then returns an object 
+ * with these parsed parameters.
+ *
+ * @return {Object} An object containing parsed parameters.
+ */
 function getUrlParams() {
-	var params = {};
-	window.location.search.substring(1).split('&').forEach(function(pair) {
-		var [key, value] = pair.split('=');
-		if (value && value.includes('-')) { // If it's a range
-			var [startDate, endDate] = value.split('-');
-			var currentDate = new Date(startDate.slice(0, 4), startDate.slice(4, 6) - 1, startDate.slice(6, 8));
-			var end = new Date(endDate.slice(0, 4), endDate.slice(4, 6) - 1, endDate.slice(6, 8));
+    let params = {};
+    window.location.search.substring(1).split('&').forEach(pair => {
+        let [key, value] = pair.split('=');
+        if (value && value.includes('-')) { 
+            let [startDate, endDate] = value.split('-');
+            let currentDate = new Date(startDate.slice(0, 4), startDate.slice(4, 6) - 1, startDate.slice(6, 8));
+            let end = new Date(endDate.slice(0, 4), endDate.slice(4, 6) - 1, endDate.slice(6, 8));
 
-			while (currentDate <= end) {
-				if (!params[key]) {
-					params[key] = [];
-				}
-				params[key].push(currentDate.toISOString().slice(0, 10).replace(/-/g, '')); // Adding each date of the range to the params
-				currentDate.setDate(currentDate.getDate() + 1); // Move to the next date
-			}
-		} else if (value) {
-			if (!params[key]) {
-				params[key] = [];
-			}
-			params[key].push(decodeURIComponent(value));
-		}
-	});
-	return params;
+            while (currentDate <= end) {
+                if (!params[key]) {
+                    params[key] = [];
+                }
+                params[key].push(currentDate.toISOString().slice(0, 10).replace(/-/g, '')); 
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        } else if (value) {
+            if (!params[key]) {
+                params[key] = [];
+            }
+            params[key].push(decodeURIComponent(value));
+        }
+    });
+    return params;
 }
 
-var colorMap = {
-	'r': '#A0524D',
-	'g': '#608B4E',
-	'b': '#5C7295',
-	'p': '#7D6C8C'
+/** Map of shorthand character keys to their corresponding colors. */
+const colorMap = {
+    'r': '#A0524D',
+    'g': '#608B4E',
+    'b': '#5C7295',
+    'p': '#7D6C8C'
 };
 
+/**
+ * Uses the colorMap and the parameters from the URL to apply specific color stylings 
+ * to elements on the page that match the date criteria.
+ */
 function applySpecialDates() {
-	var params = getUrlParams();
-	Object.keys(colorMap).forEach(colorKey => {
-		if (params[colorKey]) {
-			params[colorKey].forEach(dateString => {
-				var [year, month, day] = [dateString.slice(0, 4), dateString.slice(4, 6) - 1, dateString.slice(6, 8)];
-				var cell = document.querySelector(`#month${month} .day-cell:nth-child(${parseInt(day) + new Date(year, month, 1).getDay() - 1})`);
-				if (cell) {
-					cell.style.backgroundColor = colorMap[colorKey];
-					cell.style.color = '#fff'; // Set text color to white for better visibility
-				}
-			});
-		}
-	});
+    let params = getUrlParams();
+    Object.keys(colorMap).forEach(colorKey => {
+        if (params[colorKey]) {
+            params[colorKey].forEach(dateString => {
+                let [year, month, day] = [dateString.slice(0, 4), dateString.slice(4, 6) - 1, dateString.slice(6, 8)];
+                let cell = document.querySelector(`#month${month} .day-cell:nth-child(${parseInt(day) + new Date(year, month, 1).getDay() - 1})`);
+                if (cell) {
+                    cell.style.backgroundColor = colorMap[colorKey];
+                    cell.style.color = '#fff'; 
+                }
+            });
+        }
+    });
 }
 
 
+/**
+ * Updates the date and time displayed on the page and in the title bar.
+ * The title bar displays the format: HH:MM DDD D MMM.
+ * The page body displays the full time and date using helper functions.
+ */
 function updateDateTime() {
-	var now = new Date();
-	var time = formatTime(now);  // formatTime is a helper function that formats the time.
-	var date = formatDate(now);  // formatDate is a helper function that formats the date.
+    let now = new Date();
+    let time = formatTime(now);  // formatTime is a helper function that formats the time.
+    let date = formatDate(now);  // formatDate is a helper function that formats the date.
 
-	// These lines update the content of the 'time' and 'date' elements instead of the 'dateTime' element.
-	document.getElementById('time').textContent = time;
-	document.getElementById('date').textContent = date;
+    // Update the content of the 'time' and 'date' elements.
+    document.getElementById('time').textContent = time;
+    document.getElementById('date').textContent = date;
 
-	// The title is formatted with another helper function, formatShortDate.
-	document.title = time + ' ' + formatShortDate(now);
+    // Update the title with the desired format: HH:MM DDD D MMM
+    let hours = String(now.getHours()).padStart(2, '0');
+    let minutes = String(now.getMinutes()).padStart(2, '0');
+    let dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
+    let dayOfMonth = now.getDate();
+    let monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()];
+    document.title = `${hours}:${minutes} ${dayName} ${dayOfMonth} ${monthName}`;
 }
-
-setInterval(updateDateTime, 1000);
-
+/**
+ * Generates a calendar grid, starting 3 months ago and spanning 12 months in total.
+ */
 function generateCalendarGrid() {
-	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-	var calendarContainer = document.getElementById('calendar');
-	var currentDate = new Date();
-	var currentYear = currentDate.getFullYear();
-	var currentMonth = currentDate.getMonth();
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const calendarContainer = document.getElementById('calendar');
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
-	for (var i = 0; i < 12; i++) { // Create 12 month containers
-		var month = (currentMonth + i + 12 - 3) % 12; // Start from 3 months ago
-		var year = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12);
+    for (let i = 0; i < 12; i++) {
+        const month = (currentMonth + i + 12 - 3) % 12; 
+        const year = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12);
 
-		var monthContainer = document.createElement('div');
-		monthContainer.id = 'month' + month; // Create ids based on actual month number
-		monthContainer.className = 'month-grid';
-		monthContainer.innerHTML = '<h3>' + months[month] + ' ' + year + '</h3>';
+        const monthContainer = document.createElement('div');
+        monthContainer.id = `month${month}`;
+        monthContainer.className = 'month-grid';
+        monthContainer.innerHTML = `<h3>${months[month]} ${year}</h3>`;
 
-		calendarContainer.appendChild(monthContainer);
-	}
+        calendarContainer.appendChild(monthContainer);
+    }
 }
 
+/**
+ * Populates the previously generated calendar with the appropriate days for each month.
+ */
 function populateCalendarWithDates() {
-	var currentDate = new Date();
-	var currentYear = currentDate.getFullYear();
-	var currentMonth = currentDate.getMonth();
-	var currentDay = currentDate.getDate();
+    const currentDate = new Date();
+    let currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
-	// Leap year check
-	var isLeapYear = ((currentYear % 4 === 0) && (currentYear % 100 !== 0)) || (currentYear % 400 === 0);
+    const isLeap = year => ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
 
-	// The number of days in each month. February is adjusted for leap years.
-	var daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    for (let i = 0; i < 12; i++) {
+        const month = (currentMonth + i + 12 - 3) % 12;
+        currentYear = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12) - 1;
+        const daysInMonth = [31, isLeap(currentYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-	for (var i = 0; i < 12; i++) { // For each month
-		var month = (currentMonth + i + 12 - 3) % 12; // Start from 3 months ago
-		var year = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12) - 1;
-		isLeapYear = ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
-		daysInMonth[1] = isLeapYear ? 29 : 28; // Update February's days for leap years
-		
-		var monthContainer = document.getElementById('month' + month); // Use month index directly
-		var daysContainer = document.createElement('div');
-		monthContainer.appendChild(daysContainer);
-		var firstDay = new Date(year, month, 1).getDay();
+        const monthContainer = document.getElementById(`month${month}`);
+        const daysContainer = document.createElement('div');
+        monthContainer.appendChild(daysContainer);
+        const firstDay = new Date(currentYear, month, 1).getDay();
+        
+        for (let j = 0; j < daysInMonth[month]; j++) {
+            const dayCell = document.createElement('div');
+            dayCell.className = 'day-cell';
+            dayCell.textContent = j + 1;
 
-		// The Date object in JavaScript counts days of the week from 0 (Sunday) to 6 (Saturday)
-		// Adjust it to be from 1 (Monday) to 7 (Sunday)
-		firstDay = firstDay === 0 ? 7 : firstDay;
+            // Check conditions for special classes
+            const isWeekend = ((j + firstDay - 1) % 7 === 5) || ((j + firstDay - 1) % 7 === 6);
+            const isToday = (currentYear === currentDate.getFullYear()) && (month === currentDate.getMonth()) && (j === currentDate.getDate() - 1);
+            const isPast = (currentYear < currentDate.getFullYear()) || (currentYear === currentDate.getFullYear() && month < currentDate.getMonth()) || (currentYear === currentDate.getFullYear() && month === currentDate.getMonth() && j < currentDate.getDate());
 
-		for (var j = 0; j < daysInMonth[month]; j++) { // For each day
-			var dayCell = document.createElement('div');
-			dayCell.className = 'day-cell';
-			dayCell.textContent = j + 1; // +1 because days are 1-indexed
+            if (isPast && isWeekend) {
+                dayCell.classList.add('past-weekend');
+            } else if (isPast) {
+                dayCell.classList.add('past');
+            } else if (isWeekend) {
+                dayCell.classList.add('weekend');
+            }
 
-			var isWeekend = ((j + firstDay - 1) % 7 === 5) || ((j + firstDay - 1) % 7 === 6);
-			var isToday = (year === currentDate.getFullYear()) && (month === currentDate.getMonth()) && (j === currentDate.getDate() - 1);
-			var isPast = (year < currentDate.getFullYear()) || (year === currentDate.getFullYear() && month < currentDate.getMonth()) || (year === currentDate.getFullYear() && month === currentDate.getMonth() && j < currentDate.getDate());
+            if (isToday) {
+                dayCell.classList.add('today');
+            }
 
-			if (isPast && isWeekend) {
-				dayCell.classList.add('past-weekend');
-			} else if (isPast) {
-				dayCell.classList.add('past');
-			} else if (isWeekend) {
-				dayCell.classList.add('weekend');
-			}
+            if (j === 0) {
+                for (let k = 1; k < firstDay; k++) {
+                    const blankCell = document.createElement('div');
+                    blankCell.className = 'day-cell';
+                    blankCell.textContent = '';
+                    daysContainer.appendChild(blankCell);
+                }
+            }
 
-			if (isToday) {
-				dayCell.classList.add('today');
-			}
-
-			// Insert blank cells for the days before the first of the month
-			if (j === 0) {
-				for (var k = 1; k < firstDay; k++) {
-					var blankCell = document.createElement('div');
-					blankCell.className = 'day-cell';
-					blankCell.textContent = '';
-					daysContainer.appendChild(blankCell);
-				}
-			}
-
-			daysContainer.appendChild(dayCell);
-		}
-	}
+            daysContainer.appendChild(dayCell);
+        }
+    }
 }
 
+/**
+ * Parses a date string in various formats (YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, MM-DD-YYYY) 
+ * into a Date object.
+ *
+ * @param {string} dateStr - The string representation of the date to be parsed.
+ * @return {Date|null} - Returns the Date object or null if parsing fails.
+ */
 function parseDate(dateStr) {
-	const patterns = [
-		/^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
-		/^(\d{2})\/(\d{2})\/(\d{4})$/, // DD/MM/YYYY
-		/^(\d{2})-(\d{2})-(\d{4})$/, // DD-MM-YYYY
-		/^(\d{2})-(\d{2})-(\d{4})$/ // MM-DD-YYYY
-	];
+    const patterns = [
+        /^(\d{4})-(\d{2})-(\d{2})$/, 
+        /^(\d{2})\/(\d{2})\/(\d{4})$/, 
+        /^(\d{2})-(\d{2})-(\d{4})$/, 
+        /^(\d{2})-(\d{2})-(\d{4})$/ 
+    ];
 
-	for (let pattern of patterns) {
-		const match = dateStr.match(pattern);
-		if (match) {
-			// Special handling for DD/MM/YYYY format to ensure accurate parsing
-			if (pattern === /^(\d{2})\/(\d{2})\/(\d{4})$/) {
-				return new Date(match[3], match[2] - 1, match[1]); // year, month (0-indexed), day
-			} else if (pattern === /^(\d{2})-(\d{2})-(\d{4})$/) {
-				return new Date(match[3], match[2] - 1, match[1]); // year, month (0-indexed), day
-			} else {
-				const dateObj = new Date(dateStr);
-				if (!isNaN(dateObj)) {
-					return dateObj;
-				}
-			}
-		}
-	}
-
-	// Return null if date couldn't be parsed
-	return null;
+    for (let pattern of patterns) {
+        const match = dateStr.match(pattern);
+        if (match) {
+            if (pattern === /^(\d{2})\/(\d{2})\/(\d{4})$/) {
+                return new Date(match[3], match[2] - 1, match[1]);
+            } else if (pattern === /^(\d{2})-(\d{2})-(\d{4})$/) {
+                return new Date(match[3], match[2] - 1, match[1]);
+            } else {
+                const dateObj = new Date(dateStr);
+                if (!isNaN(dateObj)) {
+                    return dateObj;
+                }
+            }
+        }
+    }
+    return null;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
