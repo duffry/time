@@ -167,57 +167,75 @@ function generateCalendarGrid() {
 }
 
 /**
+ * Checks if a given year is a leap year.
+ * @param {number} year - The year to check.
+ * @returns {boolean} - True if it's a leap year, false otherwise.
+ */
+function isLeapYear(year) {
+    return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
+}
+
+/**
+ * Creates and returns a day cell element.
+ * @param {number} day - The day number.
+ * @param {number} firstDay - The first day of the month (0 = Sunday, 6 = Saturday).
+ * @param {number} month - The current month.
+ * @param {number} year - The current year.
+ * @returns {HTMLElement} - The created day cell.
+ */
+function createDayCell(day, firstDay, month, year) {
+    const currentDate = new Date();
+    const dayCell = document.createElement('div');
+    dayCell.className = 'day-cell';
+    dayCell.textContent = day;
+
+    const dayOfWeek = (day + firstDay - 1) % 7;
+    const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+    const isToday = (year === currentDate.getFullYear()) && (month === currentDate.getMonth()) && (day === currentDate.getDate());
+    const isPast = (year < currentDate.getFullYear()) || (year === currentDate.getFullYear() && month < currentDate.getMonth()) || (year === currentDate.getFullYear() && month === currentDate.getMonth() && day < currentDate.getDate());
+
+    if (isPast && isWeekend) {
+        dayCell.classList.add('past-weekend');
+    } else if (isPast) {
+        dayCell.classList.add('past');
+    } else if (isWeekend) {
+        dayCell.classList.add('weekend');
+    }
+
+    if (isToday) {
+        dayCell.classList.add('today');
+    }
+
+    return dayCell;
+}
+
+/**
  * Populates the previously generated calendar with the appropriate days for each month.
  */
 function populateCalendarWithDates() {
     const currentDate = new Date();
-    let currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
-
-    const isLeap = year => ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
 
     for (let i = 0; i < 12; i++) {
         const month = (currentMonth + i + 12 - 3) % 12;
-        currentYear = currentYear + Math.floor((currentMonth + i + 12 - 3) / 12) - 1;
-        const daysInMonth = [31, isLeap(currentYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
+        const year = currentDate.getFullYear() + Math.floor((currentMonth + i + 12 - 3) / 12) - 1;
+        
+        const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const monthContainer = document.getElementById(`month${month}`);
         const daysContainer = document.createElement('div');
         monthContainer.appendChild(daysContainer);
-        const firstDay = new Date(currentYear, month, 1).getDay();
-        
-        for (let j = 0; j < daysInMonth[month]; j++) {
-            const dayCell = document.createElement('div');
-            dayCell.className = 'day-cell';
-            dayCell.textContent = j + 1;
+        const firstDay = new Date(year, month, 1).getDay();
 
-            // Check conditions for special classes
-            const isWeekend = ((j + firstDay - 1) % 7 === 5) || ((j + firstDay - 1) % 7 === 6);
-            const isToday = (currentYear === currentDate.getFullYear()) && (month === currentDate.getMonth()) && (j === currentDate.getDate() - 1);
-            const isPast = (currentYear < currentDate.getFullYear()) || (currentYear === currentDate.getFullYear() && month < currentDate.getMonth()) || (currentYear === currentDate.getFullYear() && month === currentDate.getMonth() && j < currentDate.getDate());
-
-            if (isPast && isWeekend) {
-                dayCell.classList.add('past-weekend');
-            } else if (isPast) {
-                dayCell.classList.add('past');
-            } else if (isWeekend) {
-                dayCell.classList.add('weekend');
-            }
-
-            if (isToday) {
-                dayCell.classList.add('today');
-            }
-
-            if (j === 0) {
+        for (let day = 1; day <= daysInMonth[month]; day++) {
+            if (day === 1) {
                 for (let k = 1; k < firstDay; k++) {
                     const blankCell = document.createElement('div');
                     blankCell.className = 'day-cell';
-                    blankCell.textContent = '';
                     daysContainer.appendChild(blankCell);
                 }
             }
 
-            daysContainer.appendChild(dayCell);
+            daysContainer.appendChild(createDayCell(day, firstDay, month, year));
         }
     }
 }
