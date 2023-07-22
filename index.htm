@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
     <title>Time and Date</title>
 	<link rel="stylesheet" href="style.css">
 	<!-- For general browsers -->
@@ -23,43 +24,13 @@
         <div id="time"></div>
         <div id="date"></div>
     </div>
+
+	<div id="color-palette"></div>
+
     <div id="calendar"></div>
+	<div><button id="clearHighlights">Clear Highlights</button></div>
 
-	<div id="date-entry-container">
-		<h3>Add Custom Dates</h3>
-		<form id="date-entry-form">
-			<textarea id="date-entry-textarea" rows="5" cols="30" placeholder="Enter dates (comma or line separated)"></textarea>
-			<br>
-			<input type="submit" value="Add Dates">
-		</form>
-	</div>
-	
 	<script src="main.js"></script>
-	<script>
-		document.getElementById('date-entry-form').addEventListener('submit', function(event) {
-			event.preventDefault();
-			const textarea = document.getElementById('date-entry-textarea');
-			let datesArray = [];
-
-			const lines = textarea.value.split(/\n|,/);
-			for (let line of lines) {
-				const dateObj = parseDate(line.trim());
-				if (dateObj) {
-					const formattedDate = `${dateObj.getFullYear()}${String(dateObj.getMonth() + 1).padStart(2, '0')}${String(dateObj.getDate()).padStart(2, '0')}`;
-					datesArray.push(formattedDate);
-				}
-			}
-
-			const currentURL = new URL(window.location.href);
-			currentURL.search = '';
-			for (const date of datesArray) {
-				currentURL.searchParams.append('r', date);
-			}
-
-			window.location.href = currentURL.toString();
-		});
-	</script>
-
 </body>
 
 </html>

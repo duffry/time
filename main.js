@@ -154,7 +154,6 @@ const colorMap = {
     'm': '#9F5A4F', // Mud
 };
 
-
 /**
  * Uses the colorMap and the parameters from the URL to apply specific color stylings 
  * to elements on the page that match the date criteria.
@@ -245,6 +244,10 @@ function createDayCell(day, firstDay, year, month, currentDate) {
     const dayCell = document.createElement('div');
     dayCell.className = 'day-cell';
     dayCell.textContent = day;
+
+    // Add the data-date attribute here
+    const formattedDate = `${year}${String(month + 1).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+    dayCell.setAttribute('data-date', formattedDate);
 
     // Adjust firstDay to be from 1 (Monday) to 7 (Sunday)
     firstDay = firstDay === 0 ? 7 : firstDay;
@@ -362,6 +365,101 @@ function parseDate(dateStr) {
     return null;
 }
 
+
+const paletteContainer = document.getElementById('color-palette');
+
+// Loop through each color in the colorMap
+for (let colorKey in colorMap) {
+    const colorBlock = document.createElement('div');
+    colorBlock.className = 'color-block';
+    colorBlock.style.backgroundColor = colorMap[colorKey];
+    colorBlock.dataset.color = colorKey; // Store the color key in a data attribute
+    paletteContainer.appendChild(colorBlock);
+}
+
+// Add a special block for removal of custom highlighting
+const removeBlock = document.createElement('div');
+removeBlock.className = 'color-block remove-highlight';
+paletteContainer.appendChild(removeBlock);
+
+let selectedColor = null; // This variable will store the currently selected color
+
+// Add event listener to each color block
+const colorBlocks = document.querySelectorAll('.color-block:not(.remove-highlight)'); // Select all color blocks except the remove-highlight block
+
+colorBlocks.forEach(block => {
+    block.addEventListener('click', function() {
+        // Remove the 'selected' class from previously selected block
+        colorBlocks.forEach(b => b.classList.remove('selected'));
+        
+        // Remove the 'selected' class from the remove-highlight block
+        removeHighlightBlock.classList.remove('selected');
+
+        // Add the 'selected' class to the clicked block
+        block.classList.add('selected');
+
+        // Store the selected color
+        selectedColor = block.dataset.color; // Recall that we stored the color key in a data attribute
+    });
+});
+
+
+// Add event listener to the remove-highlight block
+const removeHighlightBlock = document.querySelector('.color-block.remove-highlight');
+removeHighlightBlock.addEventListener('click', function() {
+    // Remove the 'selected' class from previously selected block
+    colorBlocks.forEach(b => b.classList.remove('selected'));
+
+    // Add the 'selected' class to the remove-highlight block
+    removeHighlightBlock.classList.add('selected');
+
+    // Reset the selected color
+    selectedColor = null;
+});
+
+// Add event listener to the remove-highlight block
+document.querySelector('.color-block.remove-highlight').addEventListener('click', function() {
+    // Remove the 'selected' class from previously selected block
+    colorBlocks.forEach(b => b.classList.remove('selected'));
+
+    // Reset the selected color
+    selectedColor = null;
+});
+
+function updateURL(date, colorKey) {
+    const currentURL = new URL(window.location.href);
+    
+    // If a color key is selected (i.e., not remove-highlight)
+    if (colorKey && colorKey !== 'remove-highlight') {
+        // Remove any existing color for this date
+        for (const key in colorMap) {
+            if (currentURL.searchParams.getAll(key).includes(date)) {
+                const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
+                currentURL.searchParams.delete(key);
+                datesForColor.forEach(d => currentURL.searchParams.append(key, d));
+            }
+        }
+        // Add the new color for this date
+        currentURL.searchParams.append(colorKey, date);
+    } else {
+        // If remove-highlight is selected or no color key
+        // search for and remove the date from all color parameters
+        for (const key in colorMap) {
+            if (currentURL.searchParams.getAll(key).includes(date)) {
+                const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
+                currentURL.searchParams.delete(key);
+                datesForColor.forEach(d => currentURL.searchParams.append(key, d));
+                break;
+            }
+        }
+    }
+
+    // Update the URL without refreshing the page
+    history.pushState({}, "", currentURL.toString());
+}
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
     // Call the main function once the DOM is fully loaded
     main();
@@ -369,5 +467,47 @@ document.addEventListener("DOMContentLoaded", function() {
     // Start the interval to update the date and time
     setInterval(updateDateTime, 1000);
 
-    // ... any other code that needs the DOM to be loaded ...
+    const calendarCells = document.querySelectorAll('.day-cell');
+
+    console.log(`Found ${calendarCells.length} calendar cells.`);  // Log the number of calendar cells found.
+    if (calendarCells.length === 0) {
+        console.warn("The calendar cells are not generated yet. Ensure the main() function runs before this script.");
+    }
+    
+    calendarCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+            console.log(`Calendar cell clicked. Selected color: ${selectedColor}`);  // Log when a cell is clicked and the current selected color.
+    
+            if (selectedColor) {
+                // Set the background color of the cell to the selected color
+                cell.style.backgroundColor = colorMap[selectedColor];
+            } else {
+                // Reset the cell's background color to its default
+                cell.style.backgroundColor = ''; 
+            }
+
+            const cellDate = cell.getAttribute('data-date');
+            console.log("Clicked on cell with date:", cellDate);  // Log the date of the clicked cell
+            console.log("Selected color:", selectedColor);  // Log the current selected color
+            updateURL(cellDate, selectedColor);
+        });
+    });
+
+    document.getElementById('clearHighlights').addEventListener('click', function() {
+        // Clear all custom highlights from the calendar
+        const calendarCells = document.querySelectorAll('.day-cell');
+        calendarCells.forEach(cell => {
+            cell.removeAttribute('style'); // Remove any inline styles set by JavaScript
+        });
+    
+        // Reset the URL
+        const currentURL = new URL(window.location.href);
+        for (const key in colorMap) {
+            currentURL.searchParams.delete(key);
+        }
+        history.pushState({}, "", currentURL.toString());
+    });
+    
 });
+
+// EOF

@@ -1,63 +1,88 @@
 /* Main */
 
-		body {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			height: 100vh;
-			font-family: Arial, sans-serif;
-			background-color: #f0f0f0;
-		}
-		#dateTime {
-			font-size: 2em;
-			text-align: center;
-		}
-		#time {
-			font-size: 3em;
-		}
-		#calendar {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 10px;
-			width: 800px;
-			padding: 20px;
-			margin: 0 auto;
-		}
-		.month-grid {
-			display: flex;
-			flex-direction: column;
-			gap: 5px;
-		}
-		.month-grid h3 {
-			margin: 0;
-			text-align: center;
-		}
-		.month-grid div {
-			display: grid;
-			grid-template-columns: repeat(7, 1fr); /* Starts on Monday because of our order */
-			gap: 2px;
-		}
-		.day-cell {
-			border: 1px solid #ccc;
-			padding: 2px;
-			text-align: center;
-			font-size: 0.8em;
-		}
-		.blank {
-			border: 0px;
-		}
-		.past {
-			background-color: #d3d3d3; /* Light gray */
-		}
-		.weekend {
-			background-color: #fffacd; /* Light yellow */
-		}
-		.past-weekend {
-			background-color: #a9a9a9; /* Dark gray */
-		}
-		.today {
-			background-color: #ffa500; /* Orange */
-			color: #fff;
-			font-weight: bold;
-		}
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 100vh;
+	font-family: Arial, sans-serif;
+	background-color: #f0f0f0;
+}
+#dateTime {
+	font-size: 2em;
+	text-align: center;
+}
+#time {
+	font-size: 3em;
+}
+#calendar {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	width: 800px;
+	padding: 20px;
+	margin: 0 auto;
+}
+.month-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+.month-grid h3 {
+	margin: 0;
+	text-align: center;
+}
+.month-grid div {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr); /* Starts on Monday because of our order */
+	gap: 2px;
+}
+.day-cell {
+	border: 1px solid #ccc;
+	padding: 2px;
+	text-align: center;
+	font-size: 0.8em;
+    cursor: pointer;
+}
+.blank {
+	border: 0px;
+}
+.past {
+	background-color: #d3d3d3; /* Light gray */
+}
+.weekend {
+	background-color: #fffacd; /* Light yellow */
+}
+.past-weekend {
+	background-color: #a9a9a9; /* Dark gray */
+}
+.today {
+	background-color: #ffa500; /* Orange */
+	color: #fff;
+	font-weight: bold;
+}
 
+/* Palette */
+#color-palette {
+    display: flex;
+    justify-content: flex-end; /* Aligns the palette to the right */
+    gap: 5px; /* Space between color blocks */
+    margin-top: 15px; /* Space between the palette and the calendar */
+    margin-bottom: 5px; /* Space between the palette and the calendar */
+}
+
+.color-block {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+}
+
+.color-block.selected {
+    border-color: #000; /* Black border for the selected color */
+}
+
+.color-block.remove-highlight {
+    background: linear-gradient(45deg, transparent, transparent 49%, #000 49%, #000 51%, transparent 51%, transparent);
+    /* The above creates a diagonal line */
+}
