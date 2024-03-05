@@ -8,6 +8,18 @@ body {
 	font-family: Arial, sans-serif;
 	background-color: #f0f0f0;
 }
+#app-container {
+    display: flex;
+    flex-direction: row; /* Ensure this is set to row for a horizontal layout */
+    width: 800px; /* This should be the width of the calendar plus padding */
+    justify-content: space-between; /* This will place the child elements on either end */
+}
+#date-time-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Aligns the time and date to the end (right) */
+    padding-left: 20px; /* If needed to align with the calendar */
+}
 #dateTime {
 	font-size: 2em;
 	text-align: center;
@@ -63,21 +75,35 @@ body {
 }
 
 /* Palette */
+#color-palette-container {
+    display: flex;
+    flex-direction: column; /* Aligns the color blocks vertically */
+    align-items: flex-start; /* Aligns color blocks to the start (left) */
+}
 #color-palette {
     display: flex;
-    justify-content: flex-end; /* Aligns the palette to the right */
+    flex-direction: column; /* This ensures that color blocks stack vertically */
     gap: 5px; /* Space between color blocks */
     margin-top: 15px; /* Space between the palette and the calendar */
     margin-bottom: 5px; /* Space between the palette and the calendar */
 }
-
 .color-block {
     width: 20px;
     height: 20px;
     border: 2px solid #ccc;
     cursor: pointer;
+    margin-bottom: 1px;
+    position: relative; /* Set position to relative for absolute positioning of child elements */
+    display: flex; /* Use flexbox for aligning children */
+    align-items: center; /* Align children vertically in the center */
 }
-
+.color-block span {
+    margin-left: 8px; /* Adjust as needed to ensure the text doesn't overlap the color block */
+    white-space: nowrap; /* Prevent text from wrapping to the next line */
+    position: absolute; /* Position the text absolutely within the .color-block */
+    left: 100%; /* Place the left edge of the text at the end of the .color-block */
+    margin-left: 8px; /* Add some space between the block and the text */
+}
 .color-block.selected {
     border-color: #000; /* Black border for the selected color */
 }
