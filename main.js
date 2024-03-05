@@ -1,5 +1,5 @@
 import { formatTime, formatDate } from './date-time-formatting.js';
-import { updateURL } from './url-params.js';
+import { getUrlParams, updateURL } from './url-params.js';
 import { generateCalendarGrid, populateCalendarWithDates } from './calendar-display.js';
 import { applySpecialDates, colorMap } from './special-dates.js';
 
@@ -69,13 +69,52 @@ function parseDate(dateStr) {
     return null;
 }
 
-// Loop through each color in the colorMap
-for (let colorKey in colorMap) {
-    const colorBlock = document.createElement('div');
-    colorBlock.className = 'color-block';
-    colorBlock.style.backgroundColor = colorMap[colorKey];
-    colorBlock.dataset.color = colorKey; // Store the color key in a data attribute
-    paletteContainer.appendChild(colorBlock);
+function initializeColorPalette() {
+    const params = getUrlParams(); // Fetch URL parameters
+    const keys = params.keys || {}; // Extract color keys
+
+    Object.keys(colorMap).forEach(colorKey => {
+        const colorBlock = document.createElement('div');
+        colorBlock.className = 'color-block';
+        colorBlock.style.backgroundColor = colorMap[colorKey];
+        colorBlock.dataset.color = colorKey; // Store the color key in a data attribute
+
+        // Check and display key text if available
+        if (keys[colorKey]) {
+            const keySpan = document.createElement('span');
+            keySpan.textContent = ` - ${keys[colorKey]}`;
+            colorBlock.appendChild(keySpan);
+        }
+
+        // Single click event for selecting the color
+        colorBlock.addEventListener('click', function() {
+            // Deselect any previously selected color blocks
+            document.querySelectorAll('.color-block.selected').forEach(selectedBlock => {
+                selectedBlock.classList.remove('selected');
+            });
+            // Mark this color block as selected
+            colorBlock.classList.add('selected');
+            // Store the selected color for use when coloring dates
+            selectedColor = colorKey;
+        });
+
+        colorBlock.addEventListener('dblclick', function() {
+            const keyName = prompt("Enter value for this color:", keys[colorKey] || "");
+            if (keyName !== null) {
+                if (colorBlock.children.length > 0) {
+                    colorBlock.children[0].textContent = ` - ${keyName}`;
+                } else {
+                    const keySpan = document.createElement('span');
+                    keySpan.textContent = ` - ${keyName}`;
+                    colorBlock.appendChild(keySpan);
+                }
+                // Update the URL with the new key
+                updateURL(null, colorKey, keyName);
+            }
+        });
+
+        paletteContainer.appendChild(colorBlock);
+    });
 }
 
 // Add a special block for removal of custom highlighting
@@ -88,21 +127,21 @@ let selectedColor = null; // This variable will store the currently selected col
 // Add event listener to each color block
 const colorBlocks = document.querySelectorAll('.color-block:not(.remove-highlight)'); // Select all color blocks except the remove-highlight block
 
-colorBlocks.forEach(block => {
-    block.addEventListener('click', function() {
-        // Remove the 'selected' class from previously selected block
-        colorBlocks.forEach(b => b.classList.remove('selected'));
+// colorBlocks.forEach(block => {
+//     block.addEventListener('click', function() {
+//         // Remove the 'selected' class from previously selected block
+//         colorBlocks.forEach(b => b.classList.remove('selected'));
         
-        // Remove the 'selected' class from the remove-highlight block
-        removeHighlightBlock.classList.remove('selected');
+//         // Remove the 'selected' class from the remove-highlight block
+//         removeHighlightBlock.classList.remove('selected');
 
-        // Add the 'selected' class to the clicked block
-        block.classList.add('selected');
+//         // Add the 'selected' class to the clicked block
+//         block.classList.add('selected');
 
-        // Store the selected color
-        selectedColor = block.dataset.color; // Recall that we stored the color key in a data attribute
-    });
-});
+//         // Store the selected color
+//         selectedColor = block.dataset.color; // Recall that we stored the color key in a data attribute
+//     });
+// });
 
 
 // Add event listener to the remove-highlight block
@@ -130,6 +169,7 @@ document.querySelector('.color-block.remove-highlight').addEventListener('click'
 document.addEventListener("DOMContentLoaded", function() {
     // Call the main function once the DOM is fully loaded
     main();
+    initializeColorPalette();
 
     // Start the interval to update the date and time
     setInterval(updateDateTime, 1000);

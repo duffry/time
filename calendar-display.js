@@ -1,5 +1,4 @@
 import { getStartDateFromUrl } from './url-params.js';
-import { generateCalendarGrid, populateCalendarWithDates, createDayCell, getDaysInMonth, isLeapYear } from './calendar-display.js';
 
 /**
  * Generates a calendar grid, starting 3 months ago and spanning 12 months in total.

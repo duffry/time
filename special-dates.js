@@ -1,3 +1,5 @@
+import { getUrlParams } from './url-params.js';
+
 /** Map of shorthand character keys to their corresponding colors. */
 export const colorMap = {
     'r': '#A0524D', // Red

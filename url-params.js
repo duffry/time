@@ -1,4 +1,3 @@
-import { getUrlParams, getStartDateFromUrl, getDefaultStartDate, updateURL } from './url-params.js';
 import { colorMap } from './special-dates.js';
 
 /**
@@ -8,17 +7,23 @@ import { colorMap } from './special-dates.js';
  *
  * @return {Object} An object containing parsed parameters.
  */
+
 export function getUrlParams() {
     let params = {};
     window.location.search.substring(1).split('&').forEach(pair => {
         let [key, value] = pair.split('=');
+        value = decodeURIComponent(value);
 
-        // Check for 'start' parameter and handle it separately
-        if (key === 'start' && value) {
-            params[key] = decodeURIComponent(value);
+        // Handling color key parameters (e.g., "kr=Dom")
+        if (key.startsWith('k') && key.length === 2) {
+            const color = key[1]; // Extract color letter (e.g., 'r' from 'kr')
+            if (!params.keys) params.keys = {};
+            params.keys[color] = value; // Assigning key value to color
         }
-        // Handle date range parameters
-        else if (value && value.includes('-')) { 
+        // Handling start parameter and date range parameters
+        else if (key === 'start' && value) {
+            params[key] = value;
+        } else if (value && value.includes('-')) {
             let [startDate, endDate] = value.split('-');
             let currentDate = new Date(startDate.slice(0, 4), startDate.slice(4, 6) - 1, startDate.slice(6, 8));
             let end = new Date(endDate.slice(0, 4), endDate.slice(4, 6) - 1, endDate.slice(6, 8));
@@ -30,13 +35,11 @@ export function getUrlParams() {
                 params[key].push(currentDate.toISOString().slice(0, 10).replace(/-/g, '')); 
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-        } 
-        // Handle other general parameters
-        else if (value) {
+        } else if (value) {
             if (!params[key]) {
                 params[key] = [];
             }
-            params[key].push(decodeURIComponent(value));
+            params[key].push(value);
         }
     });
     return params;
@@ -107,6 +110,17 @@ export function updateURL(date, colorKey) {
                 datesForColor.forEach(d => currentURL.searchParams.append(key, d));
                 break;
             }
+        }
+    }
+
+    // Update color key descriptions
+    if (keyText !== null) {
+        // Assuming keyText is provided to associate with a color
+        const keyParam = `k${colorKey}`; // Constructing key parameter name (e.g., "kr")
+        if (keyText) { // If keyText is not empty, update or add the key
+            currentURL.searchParams.set(keyParam, keyText);
+        } else { // If keyText is empty, remove the key
+            currentURL.searchParams.delete(keyParam);
         }
     }
 

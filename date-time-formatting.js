@@ -1,5 +1,3 @@
-import { formatTime, formatDate, formatShortDate } from './date-time-formatting.js';
-
 /**
  * Formats a given date object into a time string in the format: HH:MM:SS.
  *
