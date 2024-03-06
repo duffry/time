@@ -77,15 +77,27 @@ body {
 /* Palette */
 #color-palette-container {
     display: flex;
-    flex-direction: column; /* Aligns the color blocks vertically */
+    flex-direction: row; /* Aligns the color blocks vertically */
     align-items: flex-start; /* Aligns color blocks to the start (left) */
 }
-#color-palette {
+#color-palette-1 {
     display: flex;
     flex-direction: column; /* This ensures that color blocks stack vertically */
     gap: 5px; /* Space between color blocks */
     margin-top: 15px; /* Space between the palette and the calendar */
     margin-bottom: 5px; /* Space between the palette and the calendar */
+	margin-right: 240px;
+}
+#color-palette-2 {
+    display: flex;
+    flex-direction: column; /* This ensures that color blocks stack vertically */
+    gap: 5px; /* Space between color blocks */
+    margin-top: 15px; /* Space between the palette and the calendar */
+    margin-bottom: 5px; /* Space between the palette and the calendar */
+	margin-right: 240px;
+}
+#highlight-remover {
+    margin-top: 25px; /* Space between the palette and the calendar */
 }
 .color-block {
     width: 20px;

@@ -11,7 +11,9 @@ function main() {
 }
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const paletteContainer = document.getElementById('color-palette');
+const paletteContainer1 = document.getElementById('color-palette-1');
+const paletteContainer2 = document.getElementById('color-palette-2');
+const removerContainer = document.getElementById('highlight-remover');
 
 /**
  * Updates the date and time displayed on the page and in the title bar.
@@ -69,80 +71,77 @@ function parseDate(dateStr) {
     return null;
 }
 
+function buildColorBlock (colorKey, keys) {
+    const colorBlock = document.createElement('div');
+    colorBlock.className = 'color-block';
+    colorBlock.style.backgroundColor = colorMap[colorKey];
+    colorBlock.dataset.color = colorKey; // Store the color key in a data attribute
+
+    // Check and display key text if available
+    if (keys[colorKey]) {
+        const keySpan = document.createElement('span');
+        keySpan.textContent = ` - ${keys[colorKey]}`;
+        colorBlock.appendChild(keySpan);
+    }
+
+    // Single click event for selecting the color
+    colorBlock.addEventListener('click', function() {
+        // Deselect any previously selected color blocks
+        document.querySelectorAll('.color-block.selected').forEach(selectedBlock => {
+            selectedBlock.classList.remove('selected');
+        });
+        // Mark this color block as selected
+        colorBlock.classList.add('selected');
+        // Store the selected color for use when coloring dates
+        selectedColor = colorKey;
+    });
+
+    colorBlock.addEventListener('dblclick', function() {
+        const keyName = prompt("Enter value for this color:", keys[colorKey] || "");
+        if (keyName !== null) {
+            if (colorBlock.children.length > 0) {
+                colorBlock.children[0].textContent = ` - ${keyName}`;
+            } else {
+                const keySpan = document.createElement('span');
+                keySpan.textContent = ` - ${keyName}`;
+                colorBlock.appendChild(keySpan);
+            }
+            // Update the URL with the new key
+            updateURL(null, colorKey, keyName);
+        }
+    });
+
+    return colorBlock
+}
+
 function initializeColorPalette() {
     const params = getUrlParams(); // Fetch URL parameters
     const keys = params.keys || {}; // Extract color keys
+    let i = 0;
 
     Object.keys(colorMap).forEach(colorKey => {
-        const colorBlock = document.createElement('div');
-        colorBlock.className = 'color-block';
-        colorBlock.style.backgroundColor = colorMap[colorKey];
-        colorBlock.dataset.color = colorKey; // Store the color key in a data attribute
-
-        // Check and display key text if available
-        if (keys[colorKey]) {
-            const keySpan = document.createElement('span');
-            keySpan.textContent = ` - ${keys[colorKey]}`;
-            colorBlock.appendChild(keySpan);
+        console.log(`colorKey: ${colorKey}`);
+        const colorBlock = buildColorBlock (colorKey, keys)
+        if (i % 2 === 0) {
+            console.log(`1: ${i}`);
+            paletteContainer1.appendChild(colorBlock);
+        } else {
+            console.log(`2: ${i}`);
+            paletteContainer2.appendChild(colorBlock);
         }
-
-        // Single click event for selecting the color
-        colorBlock.addEventListener('click', function() {
-            // Deselect any previously selected color blocks
-            document.querySelectorAll('.color-block.selected').forEach(selectedBlock => {
-                selectedBlock.classList.remove('selected');
-            });
-            // Mark this color block as selected
-            colorBlock.classList.add('selected');
-            // Store the selected color for use when coloring dates
-            selectedColor = colorKey;
-        });
-
-        colorBlock.addEventListener('dblclick', function() {
-            const keyName = prompt("Enter value for this color:", keys[colorKey] || "");
-            if (keyName !== null) {
-                if (colorBlock.children.length > 0) {
-                    colorBlock.children[0].textContent = ` - ${keyName}`;
-                } else {
-                    const keySpan = document.createElement('span');
-                    keySpan.textContent = ` - ${keyName}`;
-                    colorBlock.appendChild(keySpan);
-                }
-                // Update the URL with the new key
-                updateURL(null, colorKey, keyName);
-            }
-        });
-
-        paletteContainer.appendChild(colorBlock);
+        i = i + 1;
     });
 }
 
 // Add a special block for removal of custom highlighting
 const removeBlock = document.createElement('div');
 removeBlock.className = 'color-block remove-highlight';
-paletteContainer.appendChild(removeBlock);
+removerContainer.appendChild(removeBlock);
 
 let selectedColor = null; // This variable will store the currently selected color
 
 // Add event listener to each color block
 const colorBlocks = document.querySelectorAll('.color-block:not(.remove-highlight)'); // Select all color blocks except the remove-highlight block
-
-// colorBlocks.forEach(block => {
-//     block.addEventListener('click', function() {
-//         // Remove the 'selected' class from previously selected block
-//         colorBlocks.forEach(b => b.classList.remove('selected'));
-        
-//         // Remove the 'selected' class from the remove-highlight block
-//         removeHighlightBlock.classList.remove('selected');
-
-//         // Add the 'selected' class to the clicked block
-//         block.classList.add('selected');
-
-//         // Store the selected color
-//         selectedColor = block.dataset.color; // Recall that we stored the color key in a data attribute
-//     });
-// });
-
 
 // Add event listener to the remove-highlight block
 const removeHighlightBlock = document.querySelector('.color-block.remove-highlight');
@@ -198,23 +197,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Selected color:", selectedColor);  // Log the current selected color
             updateURL(cellDate, selectedColor);
         });
-    });
-
-    document.getElementById('clearHighlights').addEventListener('click', function() {
-        // Clear all custom highlights from the calendar
-        const calendarCells = document.querySelectorAll('.day-cell');
-        calendarCells.forEach(cell => {
-            cell.removeAttribute('style'); // Remove any inline styles set by JavaScript
-        });
-    
-        // Reset the URL
-        const currentURL = new URL(window.location.href);
-        for (const key in colorMap) {
-            currentURL.searchParams.delete(key);
-        }
-        history.pushState({}, "", currentURL.toString());
-    });
-    
+    });    
 });
 
 // EOF
