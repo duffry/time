@@ -91,24 +91,6 @@ export function updateURL(date, colorKey, keyName = null) {
 
     console.log(`Updating URL. Date: ${date}, Color Key: ${colorKey}, Key Name: ${keyName}`);
 
-    // Update the color for a specific date
-    if (date && colorKey) {
-        // Logic to remove any existing color for this date and add the new one
-        // Make sure this logic is correct and updates the URL as expected
-        console.log(`Updating color for date: ${date}`);
-        // Remove any existing color for this date
-        for (const key in colorMap) {
-            if (currentURL.searchParams.getAll(key).includes(date)) {
-                const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
-                currentURL.searchParams.delete(key);
-                datesForColor.forEach(d => currentURL.searchParams.append(key, d));
-            }
-        }
-        // Add the new color for this date
-        currentURL.searchParams.append(colorKey, date);
-        updated = true;
-    }
-    
     // Update the color key's name
     if (colorKey && keyName !== null) {
         const keyParam = `k${colorKey}`; // Construct the key parameter name
@@ -135,6 +117,26 @@ export function updateURL(date, colorKey, keyName = null) {
         updated = true;
     }
 
+    // Update the color for a specific date
+    if (date && colorKey) {
+        // Logic to remove any existing color for this date and add the new one
+        // Make sure this logic is correct and updates the URL as expected
+        console.log(`Updating color for date: ${date}`);
+        // Remove any existing color for this date
+        for (const key in colorMap) {
+            if (currentURL.searchParams.getAll(key).includes(date)) {
+                const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
+                currentURL.searchParams.delete(key);
+                datesForColor.forEach(d => currentURL.searchParams.append(key, d));
+            }
+        }
+        // Add the new color for this date
+        console.log('URL From:', currentURL.toString());
+        currentURL.searchParams.append(colorKey, date);
+        console.log('URL to  :', currentURL.toString());
+        updated = true;
+    }
+    
     // Only push state if something was updated
     if (updated) {
         console.log('Pushing new state to URL:', currentURL.toString());
@@ -143,46 +145,3 @@ export function updateURL(date, colorKey, keyName = null) {
         console.log('No updates made to the URL.');
     }
 }
-
-// export function updateURL(date, colorKey) {
-//     const currentURL = new URL(window.location.href);
-    
-    // // If a color key is selected (i.e., not remove-highlight)
-    // if (colorKey && colorKey !== 'remove-highlight') {
-    //     // Remove any existing color for this date
-    //     for (const key in colorMap) {
-    //         if (currentURL.searchParams.getAll(key).includes(date)) {
-    //             const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
-    //             currentURL.searchParams.delete(key);
-    //             datesForColor.forEach(d => currentURL.searchParams.append(key, d));
-    //         }
-    //     }
-    //     // Add the new color for this date
-    //     currentURL.searchParams.append(colorKey, date);
-    // } else {
-    //     // If remove-highlight is selected or no color key
-    //     // search for and remove the date from all color parameters
-    //     for (const key in colorMap) {
-    //         if (currentURL.searchParams.getAll(key).includes(date)) {
-    //             const datesForColor = currentURL.searchParams.getAll(key).filter(d => d !== date);
-    //             currentURL.searchParams.delete(key);
-    //             datesForColor.forEach(d => currentURL.searchParams.append(key, d));
-    //             break;
-    //         }
-    //     }
-    // }
-
-//     // Update color key descriptions
-//     if (keyText !== null) {
-//         // Assuming keyText is provided to associate with a color
-//         const keyParam = `k${colorKey}`; // Constructing key parameter name (e.g., "kr")
-//         if (keyText) { // If keyText is not empty, update or add the key
-//             currentURL.searchParams.set(keyParam, keyText);
-//         } else { // If keyText is empty, remove the key
-//             currentURL.searchParams.delete(keyParam);
-//         }
-//     }
-
-//     // Update the URL without refreshing the page
-//     history.pushState({}, "", currentURL.toString());
-// }
