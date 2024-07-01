@@ -2,14 +2,16 @@ import { getUrlParams } from './url-params.js';
 
 /** Map of shorthand character keys to their corresponding colors. */
 export const colorMap = {
-    'r': '#C54B4B', // Red
-    'g': '#608B4E', // Green
-    'b': '#5C7295', // Blue
-    'p': '#7D6C8C', // Purple
-    'y': '#C0B43E', // Yellow
-    'o': '#D79C4F', // Orange
-    't': '#3B7F83', // Teal
-    'm': '#8D5A2F', // Mud
+    'r': '#800020',  // Red
+    'a': '#708090',  // Gray
+    'g': '#608B4E',  // Green
+    'm': '#8D5A2F',  // Mud
+    'o': '#eea000',  // Orange
+    'd': '#efca00',  // Gold
+    'k': '#ea6ec8',  // Pink
+    'p': '#7234aa',  // Purple
+    'b': '#2a71e3',  // Blue
+    't': '#007c7c',  // Teal
 };
 
 /**

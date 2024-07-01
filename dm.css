@@ -1,0 +1,16 @@
+:root {
+    --background-color: white;
+    --text-color: black;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Define the dark theme variables */
+body.dark {
+    --background-color: black;
+    --text-color: white;
+}

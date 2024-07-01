@@ -1,78 +1,94 @@
 /* Main */
 
 body {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	height: 100vh;
-	font-family: Arial, sans-serif;
-	background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color, #f0f0f0); /* Use CSS variable with default */
+    color: var(--text-color, #000); /* Use CSS variable with default */
 }
+
 #app-container {
     display: flex;
     flex-direction: row; /* Ensure this is set to row for a horizontal layout */
     width: 800px; /* This should be the width of the calendar plus padding */
     justify-content: space-between; /* This will place the child elements on either end */
 }
+
 #date-time-container {
     display: flex;
     flex-direction: column;
     align-items: flex-end; /* Aligns the time and date to the end (right) */
     padding-left: 20px; /* If needed to align with the calendar */
 }
+
 #dateTime {
-	font-size: 2em;
-	text-align: center;
+    font-size: 2em;
+    text-align: center;
 }
+
 #time {
-	font-size: 3em;
+    font-size: 3em;
 }
+
 #calendar {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 10px;
-	width: 800px;
-	padding: 20px;
-	margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 800px;
+    padding: 20px;
+    margin: 0 auto;
 }
+
 .month-grid {
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
+
 .month-grid h3 {
-	margin: 0;
-	text-align: center;
+    margin: 0;
+    text-align: center;
 }
+
 .month-grid div {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr); /* Starts on Monday because of our order */
-	gap: 2px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* Starts on Monday because of our order */
+    gap: 2px;
 }
+
 .day-cell {
-	border: 1px solid #ccc;
-	padding: 2px;
-	text-align: center;
-	font-size: 0.8em;
+    border: 1px solid #ccc;
+    padding: 2px;
+    text-align: center;
+    font-size: 0.8em;
     cursor: pointer;
 }
+
 .blank {
-	border: 0px;
+    border: 0px;
 }
+
 .past {
-	background-color: #d3d3d3; /* Light gray */
+    background-color: var(--past-color, #d3d3d3); /* Light gray */
 }
+
 .weekend {
-	background-color: #fffacd; /* Light yellow */
+    background-color: var(--weekend-color, #fffacd); /* Light yellow */
 }
+
 .past-weekend {
-	background-color: #a9a9a9; /* Dark gray */
+    background-color: var(--past-weekend-color, #a9a9a9); /* Dark gray */
 }
+
 .today {
-/*	background-color: #ffa500; /* Orange */
-/*	color: #fff;*/
-	font-weight: bold;
-    border: 3px solid #000;
+    /* background-color: #ffa500; /* Orange */
+    /* color: #fff; */
+    font-weight: bold;
+    border: 3px solid var(--today-border-color, #333);
+    background: linear-gradient(150deg, transparent, transparent 60%, var(--today-border-color, #333) 60%, var(--today-border-color, #333) 100%);
 }
 
 /* Palette */
@@ -81,25 +97,29 @@ body {
     flex-direction: row; /* Aligns the color blocks vertically */
     align-items: flex-start; /* Aligns color blocks to the start (left) */
 }
+
 #color-palette-1 {
     display: flex;
     flex-direction: column; /* This ensures that color blocks stack vertically */
     gap: 5px; /* Space between color blocks */
     margin-top: 15px; /* Space between the palette and the calendar */
     margin-bottom: 5px; /* Space between the palette and the calendar */
-	margin-right: 240px;
+    margin-right: 180px;
 }
+
 #color-palette-2 {
     display: flex;
     flex-direction: column; /* This ensures that color blocks stack vertically */
     gap: 5px; /* Space between color blocks */
     margin-top: 15px; /* Space between the palette and the calendar */
     margin-bottom: 5px; /* Space between the palette and the calendar */
-	margin-right: 240px;
+    margin-right: 180px;
 }
+
 #highlight-remover {
     margin-top: 25px; /* Space between the palette and the calendar */
 }
+
 .color-block {
     width: 20px;
     height: 20px;
@@ -110,6 +130,7 @@ body {
     display: flex; /* Use flexbox for aligning children */
     align-items: center; /* Align children vertically in the center */
 }
+
 .color-block span {
     margin-left: 8px; /* Adjust as needed to ensure the text doesn't overlap the color block */
     white-space: nowrap; /* Prevent text from wrapping to the next line */
@@ -117,11 +138,23 @@ body {
     left: 100%; /* Place the left edge of the text at the end of the .color-block */
     margin-left: 8px; /* Add some space between the block and the text */
 }
+
 .color-block.selected {
     border-color: #000; /* Black border for the selected color */
 }
 
 .color-block.remove-highlight {
-    background: linear-gradient(45deg, transparent, transparent 49%, #000 49%, #000 51%, transparent 51%, transparent);
+    background: linear-gradient(45deg, transparent, transparent 49%, var(--diag-color, #333) 49%, var(--diag-color, #333) 51%, transparent 51%, transparent);
     /* The above creates a diagonal line */
+}
+
+/* Dark mode variables */
+body.dark {
+    --background-color: #333;
+    --text-color: #fff;
+    --today-border-color: #ccc;
+    --weekend-color: #3c4a6e; /* Subtle highlight color for #333 background */
+    --past-color: #747474; /* Swap with past-weekend color */
+    --past-weekend-color: #555555; /* Swap with past color */
+    --diag-color: #ccc;
 }

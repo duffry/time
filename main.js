@@ -8,12 +8,29 @@ function main() {
 	generateCalendarGrid();
 	populateCalendarWithDates();
 	applySpecialDates();
+    applyThemeFromUrl();
 }
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const paletteContainer1 = document.getElementById('color-palette-1');
 const paletteContainer2 = document.getElementById('color-palette-2');
 const removerContainer = document.getElementById('highlight-remover');
+
+
+function applyThemeFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const darkMode = params.get('dark') === 'true';
+
+    if (darkMode) {
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+
 
 /**
  * Updates the date and time displayed on the page and in the title bar.

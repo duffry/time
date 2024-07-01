@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Toggle</title>
+    <link rel="stylesheet" href="dm.css">
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <button id="theme-toggle">Toggle Theme</button>
+    <script>
+        // Function to set the theme based on the saved preference
+        function setTheme(theme) {
+            document.body.classList.toggle('dark', theme === 'dark');
+            localStorage.setItem('theme', theme);
+        }
+
+        // Get the saved theme from local storage or default to 'light'
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        // Add event listener to the button to toggle the theme
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+    </script>
+</body>
+</html>
