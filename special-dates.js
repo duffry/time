@@ -3,7 +3,7 @@ import { getUrlParams } from './url-params.js';
 /** Map of shorthand character keys to their corresponding colors. */
 export const colorMap = {
     'r': '#800020',  // Red
-    'a': '#708090',  // Gray
+    'a': '#8C8972',  // Gray
     'g': '#608B4E',  // Green
     'm': '#8D5A2F',  // Mud
     'o': '#eea000',  // Orange
