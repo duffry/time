@@ -137,13 +137,13 @@ function initializeColorPalette() {
     let i = 0;
 
     Object.keys(colorMap).forEach(colorKey => {
-        console.log(`colorKey: ${colorKey}`);
+        // console.log(`colorKey: ${colorKey}`);
         const colorBlock = buildColorBlock (colorKey, keys)
         if (i % 2 === 0) {
-            console.log(`1: ${i}`);
+            // console.log(`1: ${i}`);
             paletteContainer1.appendChild(colorBlock);
         } else {
-            console.log(`2: ${i}`);
+            // console.log(`2: ${i}`);
             paletteContainer2.appendChild(colorBlock);
         }
         i = i + 1;

@@ -31,17 +31,22 @@ export function generateCalendarGrid() {
 export function populateCalendarWithDates() {
     const currentDate = new Date();
 	currentDate.setHours(0, 0, 0, 0);
+    // console.log(`currentDate: ${currentDate}`);
     const startDate = getStartDateFromUrl();
     let year = startDate.getFullYear();
     let month = startDate.getMonth();
+    // console.log(`year: ${year}`);
+    // console.log(`month: ${month}`);
 
     for (let i = 0; i < 12; i++) { 
+        // console.log(`======= i: ${i}`);
         const monthContainer = document.getElementById('month' + month); 
         const daysContainer = document.createElement('div');
         monthContainer.appendChild(daysContainer);
 
         let firstDay = new Date(year, month, 1).getDay();
         firstDay = firstDay === 0 ? 7 : firstDay; // Adjust for Sunday
+        // console.log(`firstDay: ${firstDay}`);
 
         // Add the blank cells before the first day of the month
         for (let k = 0; k < firstDay - 1; k++) {
@@ -52,6 +57,7 @@ export function populateCalendarWithDates() {
 
         // Number of days in the current month
         const daysInMonthCount = getDaysInMonth(month, year);
+        // console.log(`daysInMonthCount: ${daysInMonthCount}`);
 
         // Add the actual days of the month
         for (let day = 1; day <= daysInMonthCount; day++) {
